@@ -1,0 +1,499 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TaskNest API",
+    "version": "1.0.0",
+    "description": "API documentation for TaskNest – A Team Collaboration & Task Management App"
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "email": { "type": "string" },
+                  "password": { "type": "string" },
+                  "role": { "type": "string" }
+                },
+                "required": ["name", "email", "password", "role"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User Registered Successfully"
+          },
+          "400": { "description": "User already exists or validation error" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "User logged in Successfully" },
+          "400": { "description": "User not found or validation error" },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Logout user",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "User logged Out" }
+        }
+      }
+    },
+    "/auth/forgot-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Send OTP for password reset",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" }
+                },
+                "required": ["email"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "OTP Generated" },
+          "400": { "description": "User Not Found or validation error" }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Reset password with OTP",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "otp": { "type": "string" },
+                  "newPassword": { "type": "string" }
+                },
+                "required": ["email", "otp", "newPassword"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Password Reset Successfully" },
+          "400": { "description": "OTP Expired or Invalid" }
+        }
+      }
+    },
+    "/project/create-project": {
+      "post": {
+        "tags": ["Project"],
+        "summary": "Create a new project (admin only)",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "description": { "type": "string" }
+                },
+                "required": ["name", "description"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Project created successfully" },
+          "400": { "description": "All Fields are required" },
+          "403": { "description": "Only admin can create Projects" },
+          "409": { "description": "Project already exist" }
+        }
+      }
+    },
+    "/project/add-member": {
+      "post": {
+        "tags": ["Project"],
+        "summary": "Add member to project",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "projectId": { "type": "string" },
+                  "userId": { "type": "string" }
+                },
+                "required": ["projectId", "userId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Member added successfully" },
+          "400": { "description": "Project ID or User ID is not valid" }
+        }
+      }
+    },
+    "/project/remove-member/{projectId}/{userId}": {
+      "delete": {
+        "tags": ["Project"],
+        "summary": "Remove member from project (admin only)",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "projectId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "userId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Member Removed Successfully!!!" },
+          "400": { "description": "Project ID or User ID is not valid or Member Not Found" },
+          "403": { "description": "Only Admin can remove Member" }
+        }
+      }
+    },
+    "/project/getMyProject": {
+      "get": {
+        "tags": ["Project"],
+        "summary": "Get all projects of the current user",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Projects Found Successfully!!!!" },
+          "400": { "description": "Project Not Found" }
+        }
+      }
+    },
+    "/task/create-task": {
+      "post": {
+        "tags": ["Task"],
+        "summary": "Create a new task",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "dueDate": { "type": "string", "format": "date-time" },
+                  "assignedTo": { "type": "string" },
+                  "projectId": { "type": "string" },
+                  "tags": { "type": "array", "items": { "type": "string" } }
+                },
+                "required": ["title", "description", "dueDate", "assignedTo", "projectId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Task Created Successfully!!" },
+          "400": { "description": "Project Not Found or validation error" },
+          "403": { "description": "Current User is Not a Member of the Project" }
+        }
+      }
+    },
+    "/task/update-status/{taskId}": {
+      "patch": {
+        "tags": ["Task"],
+        "summary": "Update task status",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskStatus": { "type": "string" }
+                },
+                "required": ["taskStatus"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Task status updated successfully!" },
+          "400": { "description": "Task Not Found" }
+        }
+      }
+    },
+    "/task/get-task/{projectId}": {
+      "get": {
+        "tags": ["Task"],
+        "summary": "Get tasks by project id",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "projectId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Task Fetched Successfully!!" },
+          "400": { "description": "Task not found" }
+        }
+      }
+    },
+    "/task/delete-task/{taskId}": {
+      "delete": {
+        "tags": ["Task"],
+        "summary": "Delete a task",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Task Deleted Successfully" }
+        }
+      }
+    },
+    "/task/{taskId}/follow": {
+      "patch": {
+        "tags": ["Task"],
+        "summary": "Follow a task",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "You are now following this task" },
+          "400": { "description": "Task not found or invalid" }
+        }
+      }
+    },
+    "/task/{taskId}/unfollow": {
+      "patch": {
+        "tags": ["Task"],
+        "summary": "Unfollow a task",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Unfollowed task" },
+          "400": { "description": "Task not found or invalid" }
+        }
+      }
+    },
+    "/task/get-task": {
+      "get": {
+        "tags": ["Task"],
+        "summary": "Get tasks by tag",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "tags", "in": "query", "required": true, "schema": { "type": "string" }, "description": "Comma separated tags" }
+        ],
+        "responses": {
+          "200": { "description": "Task fetched successsfully" }
+        }
+      }
+    },
+    "/task/get-filtered-task": {
+      "get": {
+        "tags": ["Task"],
+        "summary": "Get filtered tasks",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "priority", "in": "query", "schema": { "type": "string" } },
+          { "name": "tags", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "dueAfter", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "dueBefore", "in": "query", "schema": { "type": "string", "format": "date-time" } },
+          { "name": "project", "in": "query", "schema": { "type": "string" } },
+          { "name": "assignedTo", "in": "query", "schema": { "type": "string" } },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string" } },
+          { "name": "order", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"] } }
+        ],
+        "responses": {
+          "200": { "description": "Task fetched successfully" },
+          "400": { "description": "Tasks not found" }
+        }
+      }
+    },
+    "/comment/add-comment/{taskId}": {
+      "post": {
+        "tags": ["Comment"],
+        "summary": "Add comment to a task",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "commentText": { "type": "string" }
+                },
+                "required": ["commentText"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Comment added successfully" },
+          "400": { "description": "Comment Creation failed. Server Error" }
+        }
+      }
+    },
+    "/comment/get-comment/{taskId}": {
+      "get": {
+        "tags": ["Comment"],
+        "summary": "Get comments by task id",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Comments Fetched Successfully" },
+          "400": { "description": "Task ID is invalid" }
+        }
+      }
+    },
+    "/comment/update-comment/{commentId}": {
+      "patch": {
+        "tags": ["Comment"],
+        "summary": "Update a comment",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "commentId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "updatedComment": { "type": "string" }
+                },
+                "required": ["updatedComment"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Comment Updated Successfully" },
+          "400": { "description": "Invalid Comment Id or Only Creator of the comment can update" }
+        }
+      }
+    },
+    "/comment/delete-comment/{commentId}": {
+      "delete": {
+        "tags": ["Comment"],
+        "summary": "Delete a comment",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "commentId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "Comment Deleted Successfully" },
+          "400": { "description": "Invalid Comment Id or Only Creator of the comment can delete the comment" }
+        }
+      }
+    },
+    "/activity/activity/{taskId}": {
+      "get": {
+        "tags": ["Activity"],
+        "summary": "Get activity logs for a task",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "Logs fetched successfully" },
+          "400": { "description": "Invalid Task Id" }
+        }
+      }
+    },
+    "/activity/activity/admin": {
+      "get": {
+        "tags": ["Activity"],
+        "summary": "Get all projects activity (admin only)",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "All Projects Activity Found" },
+          "400": { "description": "Only Admin can see all projects activity or Projects Activity not Found" }
+        }
+      }
+    },
+    "/audit/{taskId}": {
+      "get": {
+        "tags": ["Audit"],
+        "summary": "Get audit trail for a task",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "name": "taskId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } }
+        ],
+        "responses": {
+          "200": { "description": "Audit Logs Fetched Successfully" },
+          "400": { "description": "Invalid Task Id" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "accessToken"
+      }
+    }
+  }
+} 
